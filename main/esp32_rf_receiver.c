@@ -11,7 +11,7 @@
 #include "freertos/task.h"
 #include <freertos/queue.h>
 #include "esp_system.h"
-#include "esp_spi_flash.h"
+#include "spi_flash_mmap.h"
 #include "driver/gpio.h"
 #include "esp_intr_alloc.h"
 #include "sdkconfig.h"
@@ -22,9 +22,11 @@
 #define ADVANCED_OUTPUT 1
 #define TAG "RF433"
 
+#define GPIO_NUM  GPIO_NUM_19
+
 static xQueueHandle s_esp_RF433_queue = NULL;
 
-static const Protocol proto[] = {
+static const Protocol proto[6] = {
   { 350, {  1, 31 }, {  1,  3 }, {  3,  1 }, false },    // protocol 1
   { 650, {  1, 10 }, {  1,  2 }, {  2,  1 }, false },    // protocol 2
   { 100, { 30, 71 }, {  4, 11 }, {  9,  6 }, false },    // protocol 3
@@ -140,7 +142,7 @@ unsigned int* getReceivedRawdata() {
 
 // ---
 
-void data_interrupt_handler(void* arg)
+static void IRAM_ATTR data_interrupt_handler(void* arg)
 {
 	static unsigned int changeCount = 0;
 	static unsigned long lastTime = 0;
@@ -194,6 +196,9 @@ void receiver_rf433(void* pvParameter)
     }
     else {
   		ESP_LOGW(TAG, "Received %lu / %dbit Protocol: %d.\n", getReceivedValue(), getReceivedBitlength(), prot_num);
+
+      output(getReceivedValue(), getReceivedBitlength(), getReceivedDelay(), getReceivedRawdata(), getReceivedProtocol());
+
 			resetAvailable();
 		}
   }
@@ -208,7 +213,7 @@ void app_main()
         gpio_config_t data_pin_config = {
           .intr_type = GPIO_INTR_ANYEDGE,
           .mode = GPIO_MODE_INPUT,
-          .pin_bit_mask = GPIO_SEL_22, // GPIO_NUM_22 (SEL) DATA PIN!
+          .pin_bit_mask = BIT(GPIO_NUM), // GPIO_NUM_22 (SEL) DATA PIN!
           .pull_up_en = GPIO_PULLUP_DISABLE,
           .pull_down_en = GPIO_PULLDOWN_DISABLE
         };
@@ -216,8 +221,8 @@ void app_main()
         gpio_config(&data_pin_config);
 
         // Attach the interrupt handler
-        gpio_install_isr_service(ESP_INTR_FLAG_EDGE);
-        gpio_isr_handler_add(GPIO_NUM_22, data_interrupt_handler, NULL);  // GPIO_NUM_22 DATA PIN!
+        gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
+        gpio_isr_handler_add(GPIO_NUM, data_interrupt_handler, NULL);  // GPIO_NUM_22 DATA PIN!
         xTaskCreate(&receiver_rf433, "receiver_rf433", 2048, NULL, 3, NULL);
     }
   }

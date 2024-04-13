@@ -1,0 +1,39 @@
+{
+  "configurations": [
+    {
+      "name": "ESP-IDF",
+      "includePath": [
+        "${config:idf.espIdfPath}/components/**",
+        "${config:idf.espIdfPathWin}/components/**",
+        "${config:idf.espAdfPath}/components/**",
+        "${config:idf.espAdfPathWin}/components/**",
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/bc660/**",
+        "${workspaceFolder}/cellular_interface/**",
+        "${workspaceFolder}/cpp-core/**",
+        "${workspaceFolder}/esp32-cpp-hal/**",
+        "${workspaceFolder}/G2K/**",
+        "${workspaceFolder}/managed_components/**"
+      ],
+      "browse": {
+        "path": [
+          "${config:idf.espIdfPath}/components",
+          "${config:idf.espIdfPathWin}/components",
+          "${config:idf.espAdfPath}/components/**",
+          "${config:idf.espAdfPathWin}/components/**",
+          "${workspaceFolder}",
+          "${workspaceFolder}/**",
+          "${workspaceFolder}/bc660/**",
+          "${workspaceFolder}/cellular_interface/**",
+          "${workspaceFolder}/cpp-core/**",
+          "${workspaceFolder}/esp32-cpp-hal/**",
+          "${workspaceFolder}/G2K/**",
+          "${workspaceFolder}/managed_components/**"
+        ],
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "compilerPath": "${config:idf.toolsPath}/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin/riscv32-esp-elf-gcc"
+    }
+  ],
+  "version": 4
+}
